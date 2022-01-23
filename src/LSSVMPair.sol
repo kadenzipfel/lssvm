@@ -15,33 +15,20 @@ import {CurveErrorCodes} from "./bonding-curves/CurveErrorCodes.sol";
 /// @author boredGenius and 0xmons
 /// @notice This implements the core swap logic from NFT to TOKEN
 abstract contract LSSVMPair is Ownable, ReentrancyGuard {
+    /// -----------------------------------------------------------------------
+    /// Enums
+    /// -----------------------------------------------------------------------
+
     enum PoolType {
         TOKEN,
         NFT,
         TRADE
     }
 
-    // 90%, must <= 1 - MAX_PROTOCOL_FEE (set in LSSVMPairFactory)
-    uint256 internal constant MAX_FEE = 9e17;
+    /// -----------------------------------------------------------------------
+    /// Events
+    /// -----------------------------------------------------------------------
 
-    // Temporarily used during LSSVMRouter::_swapNFTsForToken to store the number of NFTs transferred
-    // directly to the pair. Should be 0 outside of the execution of routerSwapAnyNFTsForToken.
-    uint256 internal assetRecipientNFTBalanceAtTransferStart;
-
-    // The current price of the NFT
-    uint256 public spotPrice;
-
-    // The parameter for the pair's bonding curve
-    uint256 public delta;
-
-    // The spread between buy and sell prices. Fee is only relevant for TRADE pools
-    uint256 public fee;
-
-    // If set to 0, NFTs/tokens sent by traders during trades will be sent to the pair.
-    // Otherwise, assets will be sent to the set address. Not available for TRADE pools.
-    address payable public assetRecipient;
-
-    // Events
     event SwapWithAnyNFTs(
         uint256 tokenAmount,
         uint256 numNFTs,
@@ -57,6 +44,39 @@ abstract contract LSSVMPair is Ownable, ReentrancyGuard {
     event TokenWithdrawn(uint256 amount);
     event DeltaUpdated(uint256 newDelta);
     event FeeUpdated(uint256 newFee);
+
+    /// -----------------------------------------------------------------------
+    /// Constants
+    /// -----------------------------------------------------------------------
+
+    /// @notice The max fee charged by the pair owner
+    /// @dev 90%, must <= 1 - MAX_PROTOCOL_FEE (set in LSSVMPairFactory)
+    uint256 internal constant MAX_FEE = 9e17;
+
+    /// -----------------------------------------------------------------------
+    /// Storage variables
+    /// -----------------------------------------------------------------------
+
+    /// @dev Temporarily used during LSSVMRouter::_swapNFTsForToken to store the number of NFTs transferred
+    /// directly to the pair. Should be 0 outside of the execution of routerSwapAnyNFTsForToken.
+    uint256 internal assetRecipientNFTBalanceAtTransferStart;
+
+    /// @notice The current price of the NFT
+    uint256 public spotPrice;
+
+    /// @notice The parameter used by the bonding curve
+    uint256 public delta;
+
+    /// @notice The fee charged by the pair owner from trades. Only relevant to TRADE pools.
+    uint256 public fee;
+
+    /// @notice If set to 0, NFTs/tokens sent by traders during trades will be sent to the pair.
+    /// Otherwise, assets will be sent to the set address. Not available to TRADE pools.
+    address payable public assetRecipient;
+
+    /// -----------------------------------------------------------------------
+    /// Initialization
+    /// -----------------------------------------------------------------------
 
     /**
       @notice Called during pool creation to set initial parameters
@@ -106,9 +126,9 @@ abstract contract LSSVMPair is Ownable, ReentrancyGuard {
         spotPrice = _spotPrice;
     }
 
-    /**
-     * External state-changing functions
-     */
+    /// -----------------------------------------------------------------------
+    /// Swap functions
+    /// -----------------------------------------------------------------------
 
     /**
         @notice Sends token to the pair in exchange for any `numNFTs` NFTs
@@ -132,7 +152,10 @@ abstract contract LSSVMPair is Ownable, ReentrancyGuard {
         ICurve _bondingCurve = bondingCurve();
         IERC721 _nft = nft();
 
-        // Input validation
+        /// -----------------------------------------------------------------------
+        /// Validation
+        /// -----------------------------------------------------------------------
+
         {
             PoolType _poolType = poolType();
             require(
@@ -145,9 +168,13 @@ abstract contract LSSVMPair is Ownable, ReentrancyGuard {
             );
         }
 
-        // Call bonding curve for pricing information
+        /// -----------------------------------------------------------------------
+        /// State updates
+        /// -----------------------------------------------------------------------
+
         uint256 protocolFee;
         {
+            // Call bonding curve for pricing information
             CurveErrorCodes.Error error;
             uint256 newSpotPrice;
             (error, newSpotPrice, inputAmount, protocolFee) = _bondingCurve
@@ -164,6 +191,10 @@ abstract contract LSSVMPair is Ownable, ReentrancyGuard {
             spotPrice = newSpotPrice;
             emit SpotPriceUpdated(newSpotPrice);
         }
+
+        /// -----------------------------------------------------------------------
+        /// Effects
+        /// -----------------------------------------------------------------------
 
         _validateTokenInput(inputAmount, isRouter, routerCaller, _factory);
 
@@ -199,7 +230,10 @@ abstract contract LSSVMPair is Ownable, ReentrancyGuard {
         ICurve _bondingCurve = bondingCurve();
         IERC721 _nft = nft();
 
-        // Input validation
+        /// -----------------------------------------------------------------------
+        /// Validation
+        /// -----------------------------------------------------------------------
+
         {
             PoolType _poolType = poolType();
             require(
@@ -213,9 +247,14 @@ abstract contract LSSVMPair is Ownable, ReentrancyGuard {
             );
         }
 
-        // Call bonding curve for pricing information
+        /// -----------------------------------------------------------------------
+        /// State updates
+        /// -----------------------------------------------------------------------
+
         uint256 protocolFee;
         {
+            // Call bonding curve for pricing information
+
             CurveErrorCodes.Error error;
             uint256 newSpotPrice;
             (error, newSpotPrice, inputAmount, protocolFee) = _bondingCurve
@@ -232,6 +271,10 @@ abstract contract LSSVMPair is Ownable, ReentrancyGuard {
             spotPrice = newSpotPrice;
             emit SpotPriceUpdated(newSpotPrice);
         }
+
+        /// -----------------------------------------------------------------------
+        /// Effects
+        /// -----------------------------------------------------------------------
 
         _validateTokenInput(inputAmount, isRouter, routerCaller, _factory);
 
@@ -265,7 +308,10 @@ abstract contract LSSVMPair is Ownable, ReentrancyGuard {
         ICurve _bondingCurve = bondingCurve();
         IERC721 _nft = nft();
 
-        // Input validation
+        /// -----------------------------------------------------------------------
+        /// Validation
+        /// -----------------------------------------------------------------------
+
         {
             PoolType _poolType = poolType();
             require(
@@ -273,6 +319,10 @@ abstract contract LSSVMPair is Ownable, ReentrancyGuard {
                 "Wrong Pool type"
             );
         }
+
+        /// -----------------------------------------------------------------------
+        /// State updates
+        /// -----------------------------------------------------------------------
 
         // Call bonding curve for pricing information
         uint256 protocolFee;
@@ -300,6 +350,10 @@ abstract contract LSSVMPair is Ownable, ReentrancyGuard {
             "Out too little tokens"
         );
 
+        /// -----------------------------------------------------------------------
+        /// Effects
+        /// -----------------------------------------------------------------------
+
         _takeNFTsFromSender(_nft, nftIds);
 
         _sendTokenOutput(tokenRecipient, outputAmount);
@@ -325,9 +379,11 @@ abstract contract LSSVMPair is Ownable, ReentrancyGuard {
         IERC721 _nft = nft();
         uint256 _assetRecipientNFTBalanceAtTransferStart = assetRecipientNFTBalanceAtTransferStart -
                 2;
-        assetRecipientNFTBalanceAtTransferStart = 1;
 
-        // Input validation
+        /// -----------------------------------------------------------------------
+        /// Validation
+        /// -----------------------------------------------------------------------
+
         {
             PoolType _poolType = poolType();
             require(
@@ -335,6 +391,12 @@ abstract contract LSSVMPair is Ownable, ReentrancyGuard {
                 "Wrong Pool type"
             );
         }
+
+        /// -----------------------------------------------------------------------
+        /// State updates
+        /// -----------------------------------------------------------------------
+
+        assetRecipientNFTBalanceAtTransferStart = 1;
 
         // Call bonding curve for pricing information
         uint256 protocolFee;
@@ -358,6 +420,10 @@ abstract contract LSSVMPair is Ownable, ReentrancyGuard {
             emit SpotPriceUpdated(newSpotPrice);
         }
 
+        /// -----------------------------------------------------------------------
+        /// Effects
+        /// -----------------------------------------------------------------------
+
         _sendTokenOutput(tokenRecipient, outputAmount);
 
         _payProtocolFee(_factory, protocolFee);
@@ -378,9 +444,9 @@ abstract contract LSSVMPair is Ownable, ReentrancyGuard {
             2;
     }
 
-    /**
-     * View functions
-     */
+    /// -----------------------------------------------------------------------
+    /// View functions
+    /// -----------------------------------------------------------------------
 
     /**
         @dev Used as read function to query the bonding curve for buy pricing info
@@ -517,9 +583,9 @@ abstract contract LSSVMPair is Ownable, ReentrancyGuard {
         }
     }
 
-    /**
-     * Internal functions
-     */
+    /// -----------------------------------------------------------------------
+    /// Internal functions
+    /// -----------------------------------------------------------------------
 
     /**
         @notice Verifies and the correct amount of tokens needed for a swap is sent
@@ -602,9 +668,9 @@ abstract contract LSSVMPair is Ownable, ReentrancyGuard {
      */
     function _immutableParamsLength() internal pure virtual returns (uint256);
 
-    /**
-     * Owner functions
-     */
+    /// -----------------------------------------------------------------------
+    /// Owner functions
+    /// -----------------------------------------------------------------------
 
     /**
         @notice Rescues a specified set of NFTs owned by the pair to the owner address.
