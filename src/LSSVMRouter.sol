@@ -541,7 +541,7 @@ contract LSSVMRouter {
 
                 // Transfer all the NFTs to asset recipient
                 for (uint256 j = 0; j < swapList[i].nftIds.length; j++) {
-                    nft.safeTransferFrom(
+                    nft.transferFrom(
                         msg.sender,
                         assetRecipient,
                         swapList[i].nftIds[j]
@@ -770,7 +770,7 @@ contract LSSVMRouter {
 
             // Transfer all the NFTs to recipient
             for (uint256 j = 0; j < swapList[i].nftIds.length; j++) {
-                nft.safeTransferFrom(
+                nft.transferFrom(
                     msg.sender,
                     assetRecipient,
                     swapList[i].nftIds[j]

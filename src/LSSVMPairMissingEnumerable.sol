@@ -34,7 +34,7 @@ abstract contract LSSVMPairMissingEnumerable is LSSVMPair {
         // We're missing enumerable, so we also update the pair's own ID set
         for (uint256 i = 0; i < numNFTs; i++) {
             uint256 nftId = idSet.at(0);
-            _nft.safeTransferFrom(address(this), nftRecipient, nftId);
+            _nft.transferFrom(address(this), nftRecipient, nftId);
             idSet.remove(nftId);
         }
     }
@@ -55,7 +55,7 @@ abstract contract LSSVMPairMissingEnumerable is LSSVMPair {
         // Send NFTs to caller
         // If missing enumerable, update pool's own ID set
         for (uint256 i = 0; i < nftIds.length; i++) {
-            _nft.safeTransferFrom(address(this), nftRecipient, nftIds[i]);
+            _nft.transferFrom(address(this), nftRecipient, nftIds[i]);
             // Remove from id set
             idSet.remove(nftIds[i]);
         }
@@ -79,7 +79,7 @@ abstract contract LSSVMPairMissingEnumerable is LSSVMPair {
         // Take in NFTs from caller
         // Because we're missing enumerable, update pool's own ID set
         for (uint256 i = 0; i < nftIds.length; i++) {
-            _nft.safeTransferFrom(msg.sender, _assetRecipient, nftIds[i]);
+            _nft.transferFrom(msg.sender, _assetRecipient, nftIds[i]);
             idSet.add(nftIds[i]);
         }
     }
@@ -130,7 +130,7 @@ abstract contract LSSVMPairMissingEnumerable is LSSVMPair {
         // If it's not the pair's NFT, just withdraw normally
         if (a != address(_nft)) {
             for (uint256 i = 0; i < nftIds.length; i++) {
-                IERC721(a).safeTransferFrom(
+                IERC721(a).transferFrom(
                     address(this),
                     msg.sender,
                     nftIds[i]
@@ -140,7 +140,7 @@ abstract contract LSSVMPairMissingEnumerable is LSSVMPair {
         // Otherwise, withdraw and also remove the ID from the ID set
         else {
             for (uint256 i = 0; i < nftIds.length; i++) {
-                _nft.safeTransferFrom(address(this), msg.sender, nftIds[i]);
+                _nft.transferFrom(address(this), msg.sender, nftIds[i]);
                 idSet.remove(nftIds[i]);
             }
         }

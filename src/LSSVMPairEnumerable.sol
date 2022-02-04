@@ -30,7 +30,7 @@ abstract contract LSSVMPairEnumerable is LSSVMPair {
         for (uint256 i = 0; i < numNFTs; i++) {
             uint256 nftId = IERC721Enumerable(address(_nft))
                 .tokenOfOwnerByIndex(address(this), 0);
-            _nft.safeTransferFrom(address(this), nftRecipient, nftId);
+            _nft.transferFrom(address(this), nftRecipient, nftId);
         }
     }
 
@@ -49,7 +49,7 @@ abstract contract LSSVMPairEnumerable is LSSVMPair {
     ) internal override {
         // Send NFTs to recipient
         for (uint256 i = 0; i < nftIds.length; i++) {
-            _nft.safeTransferFrom(address(this), nftRecipient, nftIds[i]);
+            _nft.transferFrom(address(this), nftRecipient, nftIds[i]);
         }
     }
 
@@ -70,7 +70,7 @@ abstract contract LSSVMPairEnumerable is LSSVMPair {
 
         // Take in NFTs from caller
         for (uint256 i = 0; i < nftIds.length; i++) {
-            _nft.safeTransferFrom(msg.sender, _assetRecipient, nftIds[i]);
+            _nft.transferFrom(msg.sender, _assetRecipient, nftIds[i]);
         }
     }
 
@@ -111,7 +111,7 @@ abstract contract LSSVMPairEnumerable is LSSVMPair {
         onlyOwner
     {
         for (uint256 i = 0; i < nftIds.length; i++) {
-            IERC721(a).safeTransferFrom(address(this), msg.sender, nftIds[i]);
+            IERC721(a).transferFrom(address(this), msg.sender, nftIds[i]);
         }
     }
 }
