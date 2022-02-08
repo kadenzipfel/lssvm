@@ -70,7 +70,7 @@ abstract contract LSSVMPairEnumerable is LSSVMPair {
 
         // Take in NFTs from caller
         for (uint256 i = 0; i < nftIds.length; i++) {
-            _nft.transferFrom(msg.sender, _assetRecipient, nftIds[i]);
+            _nft.safeTransferFrom(msg.sender, _assetRecipient, nftIds[i]);
         }
     }
 

@@ -376,7 +376,7 @@ contract LSSVMPairFactory is Ownable, LSSVMPairFactoryLike {
 
         // transfer initial NFTs from sender to pair
         for (uint256 i = 0; i < _initialNFTIDs.length; i++) {
-            _nft.transferFrom(
+            _nft.safeTransferFrom(
                 msg.sender,
                 address(_pair),
                 _initialNFTIDs[i]
@@ -407,7 +407,7 @@ contract LSSVMPairFactory is Ownable, LSSVMPairFactoryLike {
 
         // transfer initial NFTs from sender to pair
         for (uint256 i = 0; i < _initialNFTIDs.length; i++) {
-            _nft.transferFrom(
+            _nft.safeTransferFrom(
                 msg.sender,
                 address(_pair),
                 _initialNFTIDs[i]
@@ -425,7 +425,7 @@ contract LSSVMPairFactory is Ownable, LSSVMPairFactoryLike {
     ) external {
         // transfer initial NFTs from caller to recipient
         for (uint256 i = 0; i < ids.length; i++) {
-            _nft.transferFrom(msg.sender, recipient, ids[i]);
+            _nft.safeTransferFrom(msg.sender, recipient, ids[i]);
         }
     }
 }
